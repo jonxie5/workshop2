@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  web:
+    build: ./app
+    image: $MY_REGISTRY/workshop2:workshop2_web
+    command: gunicorn nc_tutorials.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./app/:/usr/src/app/
+      - static_volume:/usr/src/app/static
+    expose:
+      - 8000
+    environment:
+      - DB_NAME=nc_tutorials_db
+      - DB_USER=$DB_USER
+      - DB_PASSWORD=$DB_PASSWORD
+      - DB_HOST=$DB_HOST
+      - DB_PORT=5432
+      - DATABASE=postgres
+      - VIRTUAL_HOST=$VIRTUAL_HOST
+      - VIRTUAL_PORT=8000
+  nginx:
+    build: ./nginx
+    image: $MY_REGISTRY/workshop2:workshop2_nginx
+    volumes:
+      - static_volume:/usr/src/app/static
+    ports:
+      - 8000:80
+    depends_on:
+      - web
+volumes:
+  static_volume:
